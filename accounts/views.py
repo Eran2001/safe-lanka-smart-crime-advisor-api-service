@@ -1,19 +1,51 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.mail import send_mail
+from django.conf import settings
 from .serializers import RegisterSerializer, UserSerializer
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+
+        subject = "Welcome to SafeLanka – The Smart Crime Advisor"
+        message = f"""
+Hello {user.username},
+
+Welcome to SafeLanka – Smart Crime Advisor! Thank you for registering with us. 
+Your account has been successfully received and is now under review.
+
+Once your registration is approved by the administrator, 
+you will be able to log in and access the system’s features.
+
+We appreciate your interest in joining our platform and look forward to supporting 
+smarter, safer, and data-driven policing.
+
+If you have any questions, feel free to contact our support team.
+
+Warm regards,  
+SafeLanka – Smart Crime Advisor Team
+        """
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+
 
 class LoginView(generics.GenericAPIView):
     serializer_class = UserSerializer
@@ -37,6 +69,7 @@ class LoginView(generics.GenericAPIView):
             "user": UserSerializer(user).data,
         }
         return Response(data, status=status.HTTP_200_OK)
+
 
 @api_view(["PATCH"])
 @permission_classes([IsAdminUser])
