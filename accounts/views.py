@@ -74,11 +74,43 @@ class LoginView(generics.GenericAPIView):
 @api_view(["PATCH"])
 @permission_classes([IsAdminUser])
 def approve_user(request, user_id):
+    from django.core.mail import send_mail
+    from django.conf import settings
+
     try:
         user = User.objects.get(id=user_id)
         user.is_approved = True
         user.save()
-        return Response({"message": f"User '{user.username}' approved successfully."}, status=status.HTTP_200_OK)
+
+        subject = "Your SafeLanka Account Has Been Approved"
+        message = f"""
+Hello {user.username},
+
+We’re pleased to inform you that your account has been approved by the SafeLanka administration team. 
+
+You can now log in and access all features of the Smart Crime Advisor system — including dashboards, reports, and predictive analytics.
+
+Login here: http://localhost:5173/
+
+If you have any questions, feel free to contact our support team.
+
+Stay safe,  
+SafeLanka – Smart Crime Advisor Team
+        """
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+
+        return Response(
+            {"message": f"User '{user.username}' approved successfully and notified via email."},
+            status=status.HTTP_200_OK
+        )
+
     except User.DoesNotExist:
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -86,10 +118,39 @@ def approve_user(request, user_id):
 @api_view(["PATCH"])
 @permission_classes([IsAdminUser])
 def reject_user(request, user_id):
+    from django.core.mail import send_mail
+    from django.conf import settings
+
     try:
         user = User.objects.get(id=user_id)
         user.is_approved = False
         user.save()
-        return Response({"message": f"User '{user.username}' rejected successfully."}, status=status.HTTP_200_OK)
+
+        subject = "SafeLanka Registration Update"
+        message = f"""
+Hello {user.username},
+
+Thank you for your interest in SafeLanka – Smart Crime Advisor. 
+Unfortunately, your registration has not been approved at this time.
+
+If you believe this was a mistake or need more information, please contact the administrator.
+
+Warm regards,  
+SafeLanka – Smart Crime Advisor Team
+        """
+
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+
+        return Response(
+            {"message": f"User '{user.username}' rejected successfully and notified via email."},
+            status=status.HTTP_200_OK
+        )
+
     except User.DoesNotExist:
         return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
