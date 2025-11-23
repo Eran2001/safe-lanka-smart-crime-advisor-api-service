@@ -1,6 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer, UserSerializer
@@ -35,3 +37,26 @@ class LoginView(generics.GenericAPIView):
             "user": UserSerializer(user).data,
         }
         return Response(data, status=status.HTTP_200_OK)
+
+@api_view(["PATCH"])
+@permission_classes([IsAdminUser])
+def approve_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_approved = True
+        user.save()
+        return Response({"message": f"User '{user.username}' approved successfully."}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(["PATCH"])
+@permission_classes([IsAdminUser])
+def reject_user(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_approved = False
+        user.save()
+        return Response({"message": f"User '{user.username}' rejected successfully."}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
