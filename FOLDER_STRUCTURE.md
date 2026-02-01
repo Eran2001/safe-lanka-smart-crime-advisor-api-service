@@ -1,17 +1,5 @@
 # SafeLanka API - Folder Structure
 
-```bash
-// For alias
-
-npm install module-alias
-
-"_moduleAliases": {
-    "@root": ".",
-    "@services": "src/services",
-    "@utils": "src/utils",
-},
-```
-
 ```
 safelanka-api/
 │
