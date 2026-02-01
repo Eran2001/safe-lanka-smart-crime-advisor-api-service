@@ -16,7 +16,7 @@ const requiredEnvVars = [
 
 // Validate required environment variables
 for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
+  if (process.env[envVar] === undefined) {
     throw new Error(`Missing required environment variable: ${envVar}`);
   }
 }
