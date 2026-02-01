@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 FOLDER_STRUCTURE
+PROJECT_SUMMARY
+QUICKSTART
 dist
 dist-ssr
 *.local
