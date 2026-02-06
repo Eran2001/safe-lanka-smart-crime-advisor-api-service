@@ -1,4 +1,4 @@
-# SafeLanka API - Smart Crime Advisor Backend
+# SafeLanka API - Smart Crime Advisor Backend.
 
 Production-ready REST API for SafeLanka crime analysis platform built with Express, MySQL, and JWT authentication.
 
